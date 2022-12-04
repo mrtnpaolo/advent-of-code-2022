@@ -1,0 +1,73 @@
+cabal-version:      3.0
+name:               advent-of-code2022
+version:            0.0.0.0
+synopsis:           Advent of Code 2022 Solutions
+homepage:           https://github.com/mrtnpaolo/advent-of-code-2022
+license:            MIT
+license-file:       LICENSE
+author:             Paolo Martini
+maintainer:         mrtnpaolo@protonmail.com
+copyright:          2022 Paolo Martini
+bug-reports:        https://github.com/mrtnpaolo/advent-of-code-2022/issues
+build-type:         Simple
+data-files:         inputs/*.txt
+
+common warnings
+    ghc-options: -Wall
+                 -Wno-unused-imports
+                 -Wno-incomplete-patterns
+                 -Wno-missing-signatures
+
+common extensions
+    default-extensions: PartialTypeSignatures
+                        ImportQualifiedPost
+                        TypeApplications
+                        PatternSynonyms
+                        ViewPatterns
+                        BlockArguments
+                        LambdaCase
+                        RecordWildCards
+                        ParallelListComp
+
+common day
+    import:             warnings
+    import:             extensions
+    build-depends:      advent-of-code2022
+                      , base
+                      , array
+                      , split
+                      , containers
+    hs-source-dirs:     execs
+    default-language:   GHC2021
+
+library
+    import:             extensions
+    exposed-modules:    Advent
+                      , Advent.Coord
+                      , Advent.Input
+                      , Advent.Search
+                      , Advent.Chinese
+                      , Advent.List
+    other-modules:      Advent.Deque
+                      , Advent.PQueue
+    build-depends:      base
+                      , array
+                      , containers
+    hs-source-dirs:     common
+    default-language:   GHC2021
+
+executable Day01
+    import:             day
+    main-is:            Day01.hs
+
+executable Day02
+    import:             day
+    main-is:            Day02.hs
+
+executable Day03
+    import:             day
+    main-is:            Day03.hs
+
+executable Day04
+    import:             day
+    main-is:            Day04.hs
