@@ -76,3 +76,7 @@ executable Day05
     import:             day
     main-is:            Day05.hs
     ghc-options:        -Wno-incomplete-uni-patterns
+
+executable Day06
+    import:             day
+    main-is:            Day06.hs
