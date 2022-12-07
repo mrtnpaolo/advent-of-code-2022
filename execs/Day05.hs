@@ -17,8 +17,8 @@ parse contents = (stacks,instrs)
     stacks =
       (\xs -> A.listArray (1,length xs) xs) .
       map (dropWhile isSpace . reverse . tail) . -- ["NZ","DCM,"P"]
-      filter (isDigit . head) . map reverse .    -- ["1NZ ","2DCM","3P  "]
-      L.transpose . lines $ raw_stacks
+      filter (isDigit . head) .                  -- ["1NZ ","2DCM","3P  "]
+      L.transpose . reverse . lines $ raw_stacks
     instrs =
       map (map (read @Int) . words) .            -- [[1,2,1],...]
       map (map (\case c | isDigit c -> c | otherwise -> ' ')) .
