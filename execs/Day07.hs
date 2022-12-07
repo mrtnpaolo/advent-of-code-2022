@@ -1,24 +1,26 @@
 module Main ( main ) where
 
-import Advent                         ( getInput )
-import Data.Maybe                     ( catMaybes )
-import Data.List                      ( tails )
-import Data.Map.Strict qualified as M ( fromListWith, elems )
+import Advent                  ( getInput )
+import Data.Char               ( isDigit )
+import Data.List               ( tails )
+import Data.Map qualified as M ( fromListWith, elems )
 
 main =
-  do inp <- propagate <$> getInput parse 7
+  do inp <- propagate . walk [] <$> getInput parse 7
      print (part1 inp)
      print (part2 inp)
 
-parse = walk [] . map words . lines
+parse = map words . filter relevant . lines
+  where
+    relevant (c:_) = c == '$' || isDigit c
 
 walk _ [] = []
-walk cwd ([_,"cd",".."]:rest) =              walk (tail cwd) rest
-walk cwd ([_,"cd",name]:rest) =              walk (name:cwd) rest
-walk cwd ([_,"ls"     ]:rest) = (cwd,size) : walk cwd        rest'
+walk cwd ([_,"cd",".."]:next) =              walk (tail cwd) next
+walk cwd ([_,"cd",name]:next) =              walk (name:cwd) next
+walk cwd ([_,"ls"     ]:next) = (cwd,size) : walk cwd        next'
   where
-    (listing,rest') = span ((2==) . length) rest
-    size = sum [ n | [file,_] <- listing, (n,_) <- reads @Int file ]
+    (files,next') = span (isDigit . head . head) next
+    size          = sum (read @Int . head <$> files)
 
 propagate paths = M.elems $ M.fromListWith (+)
   [ (parent,size) | (path,size) <- paths, parent <- tails path ]
