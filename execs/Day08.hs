@@ -1,54 +1,34 @@
-module Main (main) where
+module Main ( main ) where
 
-import Advent
-import Numeric
-import Data.Ix
-import Data.Ord
-import Data.Char
-import Data.Maybe
-import Data.Either
-import Data.List          qualified as L
-import Data.Set           qualified as S
-import Data.Map.Strict    qualified as M
-import Data.IntSet        qualified as IS
-import Data.IntMap.Strict qualified as IM
-import Data.Array.Unboxed qualified as A
-import Debug.Trace
+import Advent.List  ( count )
+import Advent.Input ( getInputArray )
+import Advent.Coord ( above, right, below, left )
+
+import Data.Ix                           ( range, inRange )
+import Data.Array.Unboxed qualified as A ( amap, (!), bounds )
 
 main =
-  do inp <- A.amap (read @Int . pure) <$> getInputArray 8
+  do inp <- A.amap (read . pure) <$> getInputArray 8
      print (part1 inp)
      print (part2 inp)
 
-part1 a = (w+h)*2 +
-  length [ ()
-         | y <- ys, x <- xs
-         , let n = a A.! (C y x)
-         , let rs = rays bounds (C y x)
-         , let vis = or [ and [ a A.! c' < n | c' <- r ] | r <- rs]
-         , vis
-         ]
-  where
-    bounds@(_,C h w) = A.bounds a
-    ys = [1..h-1]
-    xs = [1..w-1]
+part1 a = count (visible a) (range (A.bounds a))
 
-rays bounds c =
-  [ takeWhile (inRange bounds) (tail $ iterate direction c)
-  | direction <- [above,right,below,left] ]
+visible a c@((a A.!) -> n) = any (all (< n)) (trees a c)
 
-part2 a = maximum
-  [ product trees
-  | y <- ys, x <- xs
-  , let n = a A.! (C y x)
-  , let rs = rays bounds (C y x)
-  , let trees = [ view n [ a A.! c' | c' <- r ] | r <- rs ] ]
-  where
-    bounds@(_,C h w) = A.bounds a
-    ys = [1..h-1]
-    xs = [1..w-1]
+trees a c = [ [ a A.! c' | c' <- cs ] | cs <- rays a c ]
 
-view _ [] = 0 :: Int
+rays a c = takeWhile (inside a) <$>
+  [ tail (iterate dir c) | dir <- [above,right,below,left] ]
+
+inside a = inRange (A.bounds a)
+
+part2 a = maximum [ product (views a c) | c <- range (A.bounds a) ]
+
+views a c@((a A.!) -> n) = [ view n ts | ts <- trees a c ]
+
+view :: Int -> [Int] -> Int
+view _ []     = 0
 view n (x:xs)
   | x >= n    = 1
   | x <  n    = 1 + view n xs
