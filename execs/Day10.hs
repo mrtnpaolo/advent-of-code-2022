@@ -14,12 +14,12 @@ data Instruction = NoOp | AddX Int
 parse ["noop"]   = NoOp
 parse ["addx",n] = AddX (read n)
 
-part1 inp = sum [ c*x | (c,x) <- concat (L.scanl' eval [(1,1)] inp), interesting c ]
+part1 inp = sum [ i * xs !! (i-1) | i <- [20,60,100,140,180,220] ]
+  where
+    xs = concat . map reverse . L.scanl' eval [1] $ inp
 
-eval ((c,x):_) NoOp     = [(c+1,x)]
-eval ((c,x):_) (AddX n) = [(c+2,x+n),(c+1,x)]
-
-interesting c = c `elem` [20,60,100,140,180,220]
+eval (x:_) NoOp     = [x]
+eval (x:_) (AddX n) = [x+n,x]
 
 part2 = unlines . L.chunksOf 40 . draw 1 1
 
