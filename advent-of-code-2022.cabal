@@ -93,3 +93,7 @@ executable Day09
     import:             day
     main-is:            Day09.hs
     ghc-options:        -Wno-incomplete-uni-patterns
+
+executable Day10
+    import:             day
+    main-is:            Day10.hs
