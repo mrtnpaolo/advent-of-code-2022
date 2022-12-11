@@ -1,5 +1,6 @@
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
 {-# OPTIONS_GHC -Wno-type-defaults #-}
+{-# OPTIONS_GHC -Wno-name-shadowing #-}
 module Main (main) where
 
 import Advent
@@ -27,6 +28,7 @@ main =
 
 parse = map (map (map (read @Int) . words) . lines) . L.splitOn "\n\n" . map \case c | not (isDigit c || isSpace c) -> ' '; c -> c
 
+
 total = 8
 
 monkeys = [0..total-1]
@@ -43,7 +45,9 @@ items = mkArr [[ 93, 98]
   ,[ 89]
   ]
 
-worries = mkArr [(*17),(+5),(+8),(+1),(+4),(*7),(+6),(^2)]
+worries = mkArr $ map (f .) [(*17),(+5),(+8),(+1),(+4),(*7),(+6),(^2)]
+  where
+    f x = x `mod` (19*13*5*7*17*2*3*11)
 
 nexts = mkArr $ map next [ (19,5,3) ,(13,7,6) ,(5,3,0) ,(7,4,5) ,(17,1,6) ,(2,1,4) ,(3,7,2) ,(11,0,2) ]
   where
@@ -52,8 +56,8 @@ nexts = mkArr $ map next [ (19,5,3) ,(13,7,6) ,(5,3,0) ,(7,4,5) ,(17,1,6) ,(2,1,
         bored = n `mod` p == 0
         dest | bored = t | otherwise = f
 
-{-
 
+{-
 total = 4
 
 monkeys = [0..total-1]
@@ -61,7 +65,7 @@ monkeys = [0..total-1]
 mkArr = A.listArray (0,total-1)
 items = mkArr [[79, 98] ,[54, 65, 75, 74] ,[79, 60, 97] ,[74]]
 
-worries = mkArr [(*19),(+6),(^2),(+3)]
+worries = mkArr $ map ((`mod` (23*19*13*17)) .) [(*19),(+6),(^2),(+3)]
 
 nexts = mkArr $ map next [(23,2,3),(19,2,0),(13,1,3),(17,0,1)]
   where
@@ -71,9 +75,13 @@ nexts = mkArr $ map next [(23,2,3),(19,2,0),(13,1,3),(17,0,1)]
         dest | bored = t | otherwise = f
 -}
 
+{-
 part1 _ = product $ take 2 $ reverse $ L.sort $ A.elems a20
   where
     (_,a20) = last $ take 20 $ go items (mkArr (replicate total 0))
+-}
+
+part1 _ = ()
 
 go items counts = (items',counts') : go items' counts'
   where
@@ -91,10 +99,24 @@ step (a,counts) i = (a'',counts')
     updates =
       [ (i',[w])
       | n <- candidates
-      , let w = (worry n) `div` 3
+      , let w = worry n
       , let i' = next w ]
     a' = a // [(i,[])]
     a'' = A.accum (++) a' updates
     counts' = counts // [(i,counts ! i + length candidates)]
 
-part2 = const ()
+part2 _ = product $ take 2 $ reverse $ L.sort $ A.elems b
+  where
+    (_,b) = last $ take 10000 $ go items (mkArr (replicate total 0))
+
+{-
+part2 _ = f . map (A.elems . snd) . take 200 $ go items (mkArr (replicate total 0))
+
+dup _ [] = error "no duplicate"
+dup seen ((i,x):nexts)
+  | x `M.member` seen = (seen M.! x,i,x)
+  | otherwise = dup (M.insert x i seen) nexts
+
+f (_:[]) = []
+f (x:xs@(y:_)) = zipWith subtract x y : f xs
+-}
