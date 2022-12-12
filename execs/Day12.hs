@@ -2,38 +2,24 @@ module Main ( main ) where
 
 import Advent             ( getInputArray, bfsOn, cardinal )
 import Data.Char          ( ord )
-import Data.List          ( lookup )
-import Data.Array.Unboxed ( assocs, bounds, (!), (//), Ix(inRange) )
+import Data.Array.Unboxed ( assocs, bounds, (!), Ix(inRange) )
 
 main =
-  do inp <- getInputArray 12
-     print (part1 inp)
-     print (part2 inp)
+  do a <- getInputArray 12
+     print (solve 'S' a)
+     print (solve 'a' a)
 
-part1 arr = steps
+solve start a = steps
   where
-    Just steps = lookup end $ bfsOn repr next [(start,0)]
+    Just steps = lookup end $ bfsOn fst next starts
 
-    [start] = [ c | (c,'S') <- assocs arr ]
-    [end]   = [ c | (c,'E') <- assocs arr ]
+    starts = [ (c,0) | (c,x) <- assocs a, x == start ]
+    [end]  = [ c | (c,'E') <- assocs a ]
 
-    a = arr // [(start,'a'),(end,'z')]
-    next (c,n) =
-      [ (d,n+1) | d <- cardinal c, inside a d, ord (a!d) <= ord (a!c) + 1 ]
-
-    repr (c,_) = c
-
-part2 arr = steps
-  where
-    Just steps = lookup end $ bfsOn repr next [(c,0) | c <- starts]
-
-    starts = [ c | (c,'a') <- assocs arr ]
-    [end]  = [ c | (c,'E') <- assocs arr ]
-
-    a = arr // [(end,'z')]
-    next (c,n) =
-      [ (d,n+1) | d <- cardinal c, inside a d, ord (a!d) <= ord (a!c) + 1 ]
-
-    repr (c,_) = c
+    next (c,n) = [ (d,n+1) | d <- cardinal c, inside a d, allow (a!c) (a!d) ]
 
 inside a c = inRange (bounds a) c
+
+allow (\case 'S' -> 'a'; x -> x -> from)
+      (\case 'E' -> 'z'; x -> x -> to  )
+  = ord to <= ord from + 1
