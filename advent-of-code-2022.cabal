@@ -101,3 +101,9 @@ executable Day10
 executable Day11
     import:             day
     main-is:            Day11.hs
+
+executable Day12
+    import:             day
+    main-is:            Day12.hs
+    ghc-options:        -Wno-incomplete-uni-patterns
+                        -Wno-type-defaults
