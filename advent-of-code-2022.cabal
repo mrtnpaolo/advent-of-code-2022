@@ -107,3 +107,10 @@ executable Day12
     main-is:            Day12.hs
     ghc-options:        -Wno-incomplete-uni-patterns
                         -Wno-type-defaults
+
+executable Day13
+    import:             day
+    main-is:            Day13.hs
+    ghc-options:        -Wno-incomplete-uni-patterns
+                        -Wno-type-defaults
+    build-depends:      parsec
