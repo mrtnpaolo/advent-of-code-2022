@@ -18,7 +18,6 @@ import Debug.Trace
 main =
   do inp <- M.unions . (M.singleton begin '+' :) <$> getInputLines parse 14
      putStrLn (drawCoords inp)
-     print (part1 inp)
      print (part2 inp)
   where
     parse = path . words . map \case c | c `elem` ",->" -> ' '; c -> c
@@ -32,25 +31,24 @@ main =
 
 begin = C 0 500
 
-pour m = path m begin
+pour m = begin : path begin
   where
-    ybyss = 1 + maximum [ y | (C y x,'#') <- M.toList m ]
-    path m c@(C y x)
-      | Just d <- listToMaybe [ d | d <- dests c, free m d ] =
-        if y == ybyss then [Left d] else Right d : path (M.insert d '.' m) d
+    floor = 2 + maximum [ y | (C y _,'#') <- M.toList m ]
+
+    path c@(C y x)
+      | Just d <- listToMaybe [ d | d <- dests c, free d ] = d : path d
       | otherwise = []
+
+    free c@(C y _) = y < floor && M.notMember c m
 
 dests c = [below c,left (below c),right (below c)]
 
-free m c = M.notMember c m
 
-part1 = go
+part2 = go
   where
     go m
-      | null (lefts path) = go (M.insert d 'o' m)
+      | d /= begin = go (M.insert d 'o' m)
       | otherwise = count ('o'==) [ x | (c,x) <- M.toList m ]
       where
         path = pour m
-        Right d = last path
-
-part2 = const ()
+        d = last path
