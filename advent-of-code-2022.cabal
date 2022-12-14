@@ -114,3 +114,10 @@ executable Day13
     ghc-options:        -Wno-incomplete-uni-patterns
                         -Wno-type-defaults
     build-depends:      parsec
+
+executable Day14
+    import:             day
+    main-is:            Day14.hs
+    ghc-options:        -Wno-incomplete-uni-patterns
+                        -Wno-type-defaults
+    build-depends:      parsec
