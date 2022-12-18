@@ -1,19 +1,9 @@
-module Main (main) where
+module Main ( main ) where
 
-import Advent
-import Numeric
-import Data.Ix
-import Data.Ord
-import Data.Char
-import Data.Maybe
-import Data.Either
-import Data.List          qualified as L
-import Data.Set           qualified as S
-import Data.Map.Strict    qualified as M
-import Data.IntSet        qualified as IS
-import Data.IntMap.Strict qualified as IM
-import Data.Array.Unboxed qualified as A
-import Debug.Trace
+import Advent                   ( getInputLines, bfs, count )
+import Data.Ix                  ( inRange )
+import Data.List                ( tails, transpose )
+import Data.Set  qualified as S ( fromList, toList, unions, difference, member, size )
 
 main =
   do inp <- getInputLines parse 18
@@ -25,7 +15,7 @@ main =
 part1 cubes = S.size $ (S.unions cubefaces) `S.difference` (S.fromList common)
   where
     cubefaces = map (S.fromList . faces) cubes
-    common = [ f | (fs:fss) <- L.tails cubefaces, f <- S.toList fs, any (S.member f) fss ]
+    common = [ f | (fs:fss) <- tails cubefaces, f <- S.toList fs, any (S.member f) fss ]
 
 faces [x,y,z] =
   [ [[x,y,z],[x,y+1,z+1]]
@@ -35,22 +25,18 @@ faces [x,y,z] =
   , [[x,y+1,z],[x+1,y+1,z+1]]
   , [[x+1,y,z],[x+1,y+1,z+1]] ]
 
-part2 cubes = sum outer
+part2 cubes = sum outerfaces
   where
-    outer = [ n | p <- cubes, let n = count (`S.member` water) (faces p) ]
+    outerfaces = [ count (`S.member` water) (faces c) | c <- cubes ]
 
-    water = S.fromList . concatMap faces $ bfs flood [xm,ym,zm]
-
-    [xs,ys,zs] = L.transpose cubes
-
-    (xm,xM) = (minimum xs - 1,maximum xs + 1)
-    (ym,yM) = (minimum ys - 1,maximum ys + 1)
-    (zm,zM) = (minimum zs - 1,maximum zs + 1)
-
-    inside [x,y,z] = inRange ((xm,ym,zm),(xM,yM,zM)) (x,y,z)
+    water = S.fromList . concatMap faces . bfs flood $ [xm,ym,zm]
 
     flood from = [ to | to <- around from, inside to, not (cube to) ]
 
     around [x,y,z] = [ [x+1,y,z], [x-1,y,z], [x,y+1,z], [x,y-1,z], [x,y,z+1], [x,y,z-1] ]
+
+    [(xm,xM),(ym,yM),(zm,zM)] = map (\a -> (minimum a - 1,maximum a + 1)) (transpose cubes)
+
+    inside [x,y,z] = inRange ( (xm,ym,zm), (xM,yM,zM) ) (x,y,z)
 
     cube p = S.member p (S.fromList cubes)
