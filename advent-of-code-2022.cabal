@@ -126,3 +126,16 @@ executable Day15
     main-is:            Day15.hs
     ghc-options:        -Wno-incomplete-uni-patterns
                         -Wno-name-shadowing
+
+executable Day16
+    import:             day
+    main-is:            Day16.hs
+    ghc-options:        -Wno-incomplete-uni-patterns
+                        -Wno-name-shadowing
+
+executable Day17
+    import:             day
+    main-is:            Day17.hs
+    ghc-options:        -Wno-incomplete-uni-patterns
+                        -Wno-name-shadowing
+                        -Wno-unused-top-binds
