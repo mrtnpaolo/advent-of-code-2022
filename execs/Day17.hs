@@ -1,40 +1,20 @@
-module Main (main) where
+module Main ( main ) where
 
-import Advent
-import Numeric
-import Data.Ix
-import Data.Ord
-import Data.Char
-import Data.Maybe
-import Data.Either
-import Data.List          qualified as L
-import Data.Set           qualified as S
-import Data.Map.Strict    qualified as M
-import Data.IntSet        qualified as IS
-import Data.IntMap.Strict qualified as IM
-import Data.Array.Unboxed qualified as A
-import Control.Applicative
-import Debug.Trace
+import Advent ( getInputLines, Coord(..), coordRow, coordCol, addCoord
+              , origin, cardinal, above, right, below, left, drawCoords )
+import Data.Set        qualified as S
+import Data.Map.Strict qualified as M
+import Control.Applicative ((<|>))
 
 main =
   do inp <- head <$> getInputLines id 17
-     --let caves = map (\(cave,_,_) -> cave) $ part1 inp
-     --mapM_ (putStrLn . showCave) caves
      print (part1 inp)
      print (part2 inp)
 
 type Cave = S.Set Coord
 type Rock = S.Set Coord
 
-{-
-part1 gas = fall $ fall $ fall (S.empty,[r,s,t],gas) -- cycle shapes, cycle gas
-  where
-    r = S.fromList . take 4 . iterate right $ origin
-    s = S.map (addCoord (C (-1) 1)) $ S.fromList (origin : cardinal origin)
-    t = S.fromList [origin, right origin, right (right origin), above (right (right origin)), above (above (right (right (origin))))]
--}
-
-part1 gas = (\(C y _) -> 1 - y) . (\(cave,_,_) -> minimum cave) . (!! 40440) $ iterate fall (S.empty,cycle rocks,cycle gas) -- cycle shapes, cycle gas
+part1 gas = height . (!! 2022) $ iterate fall (S.empty,cycle rocks,cycle gas)
 
 rocks =
   [ S.fromList . take 4 . iterate right $ origin
@@ -83,9 +63,9 @@ lower cave rock
     rockHit = not . S.null . S.intersection cave $ rock'
     bottomHit = any ((1==) . coordRow) rock'
 
-part2 gas = height (frames !! (j+extra-1)) + cycleHeight * (cycleCount - 1)
+part2 gas = height (frames !! (j+extra)) + cycleHeight * (cycleCount - 1)
   where
-    frames = drop 1 $ iterate fall (S.empty,cycle rocks,cycle gas)
+    frames = iterate fall (S.empty,cycle rocks,cycle gas)
     sigs = map (sig (length gas)) frames
     (i,j) = findCycle sigs
 
@@ -107,9 +87,7 @@ sig n (cave,rocks,gas) = ( S.map (addCoord (C (-ym) 0)) top, take 5 rocks, take 
     C ym _ = minimum cave
     (top,_) = S.split (C (ym+k) 0) cave
 
-fst3 (x,_,_) = x
-
-height = succ . negate . coordRow . minimum . fst3
+height = succ . negate . coordRow . minimum . (\(c,_,_) -> c)
 
 showCave cave = drawCoords m
   where
