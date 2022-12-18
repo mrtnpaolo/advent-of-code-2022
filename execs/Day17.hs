@@ -83,7 +83,33 @@ lower cave rock
     rockHit = not . S.null . S.intersection cave $ rock'
     bottomHit = any ((1==) . coordRow) rock'
 
-part2 _ = ()
+part2 gas = height (frames !! (j+extra-1)) + cycleHeight * (cycleCount - 1)
+  where
+    frames = drop 1 $ iterate fall (S.empty,cycle rocks,cycle gas)
+    sigs = map (sig (length gas)) frames
+    (i,j) = findCycle sigs
+
+    cycleLen = j-i
+    (cycleCount,extra) = (1_000_000_000_000 - i) `divMod` cycleLen
+    cycleHeight = height (frames !! j) - height (frames !! i)
+
+findCycle :: Ord a => [a] -> (Int,Int)
+findCycle = go M.empty (0::Int)
+  where
+    go _ _ [] = error "no cycle"
+    go seen i (x:xs)
+      | Just j <- seen M.!? x = (j,i)
+      | otherwise = go (M.insert x i seen) (i+1) xs
+
+sig n (cave,rocks,gas) = ( S.map (addCoord (C (-ym) 0)) top, take 5 rocks, take n gas )
+  where
+    k = 100
+    C ym _ = minimum cave
+    (top,_) = S.split (C (ym+k) 0) cave
+
+fst3 (x,_,_) = x
+
+height = succ . negate . coordRow . minimum . fst3
 
 showCave cave = drawCoords m
   where
